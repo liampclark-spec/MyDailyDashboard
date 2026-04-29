@@ -1,0 +1,32 @@
+name: Daily Investment Dashboard
+
+on:
+  schedule:
+    - cron: "0 7 * * 1-5"   # 7:00 AM UTC, Monday–Friday
+  workflow_dispatch:          # also runnable manually from the GitHub Actions tab
+
+jobs:
+  send-dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run dashboard
+        env:
+          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+          EMAIL_FROM:  ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO:    ${{ secrets.EMAIL_TO }}
+          SMTP_HOST:   ${{ secrets.SMTP_HOST }}
+          SMTP_PORT:   ${{ secrets.SMTP_PORT }}
+          SMTP_USER:   ${{ secrets.SMTP_USER }}
+          SMTP_PASS:   ${{ secrets.SMTP_PASS }}
+          DAYS_BACK:   "7"
+          MAX_ARTICLES: "3"
+        run: python dashboard.py
