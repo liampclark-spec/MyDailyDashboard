@@ -20,13 +20,11 @@ jobs:
 
       - name: Run dashboard
         env:
-          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
-          EMAIL_FROM:  ${{ secrets.EMAIL_FROM }}
-          EMAIL_TO:    ${{ secrets.EMAIL_TO }}
-          SMTP_HOST:   ${{ secrets.SMTP_HOST }}
-          SMTP_PORT:   ${{ secrets.SMTP_PORT }}
-          SMTP_USER:   ${{ secrets.SMTP_USER }}
-          SMTP_PASS:   ${{ secrets.SMTP_PASS }}
-          DAYS_BACK:   "7"
-          MAX_ARTICLES: "3"
+          NEWSAPI_KEY:      ${{ secrets.NEWSAPI_KEY }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          EMAIL_FROM:       ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO:         ${{ secrets.EMAIL_TO }}
+          DAYS_BACK:        "7"
+          MAX_ARTICLES:     "3"
+          MAX_EPISODES:     "2"
         run: python dashboard.py

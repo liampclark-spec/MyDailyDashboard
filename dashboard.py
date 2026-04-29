@@ -4,14 +4,13 @@
 import argparse
 import json
 import os
-import smtplib
 import sys
 from datetime import datetime
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from pathlib import Path
 
 from dotenv import load_dotenv
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 from email_builder import build_html
 from news_fetcher import fetch_news
@@ -24,12 +23,9 @@ PORTFOLIO_FILE = ROOT / "portfolio.json"
 PODCASTS_FILE = ROOT / "podcasts.json"
 OUTPUT_DIR = ROOT / "output"
 
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
 EMAIL_FROM = os.getenv("EMAIL_FROM", "")
 EMAIL_TO = os.getenv("EMAIL_TO", "")
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER", "")
-SMTP_PASS = os.getenv("SMTP_PASS", "")
 DAYS_BACK = int(os.getenv("DAYS_BACK", "7"))
 MAX_ARTICLES = int(os.getenv("MAX_ARTICLES", "3"))
 MAX_EPISODES = int(os.getenv("MAX_EPISODES", "2"))
@@ -77,19 +73,15 @@ def fetch_all_podcasts(podcasts, days_back):
 
 def send_email(html_content):
     subject = f"Investment Dashboard – {datetime.now().strftime('%B %d, %Y')}"
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = EMAIL_FROM
-    msg["To"] = EMAIL_TO
-    msg.attach(MIMEText(html_content, "html"))
-
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.ehlo()
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASS)
-        server.sendmail(EMAIL_FROM, [a.strip() for a in EMAIL_TO.split(",")], msg.as_string())
-
-    print(f"Email sent to {EMAIL_TO}")
+    message = Mail(
+        from_email=EMAIL_FROM,
+        to_emails=[a.strip() for a in EMAIL_TO.split(",")],
+        subject=subject,
+        html_content=html_content,
+    )
+    sg = SendGridAPIClient(SENDGRID_API_KEY)
+    response = sg.send(message)
+    print(f"Email sent — status {response.status_code} → {EMAIL_TO}")
 
 
 def save_html(html_content):
@@ -101,7 +93,7 @@ def save_html(html_content):
 
 
 def check_email_config():
-    return [k for k in ("EMAIL_FROM", "EMAIL_TO", "SMTP_USER", "SMTP_PASS") if not os.getenv(k)]
+    return [k for k in ("SENDGRID_API_KEY", "EMAIL_FROM", "EMAIL_TO") if not os.getenv(k)]
 
 
 def main():
