@@ -15,11 +15,13 @@ from dotenv import load_dotenv
 
 from email_builder import build_html
 from news_fetcher import fetch_news
+from podcast_fetcher import fetch_podcast_episodes
 
 load_dotenv()
 
 ROOT = Path(__file__).parent
 PORTFOLIO_FILE = ROOT / "portfolio.json"
+PODCASTS_FILE = ROOT / "podcasts.json"
 OUTPUT_DIR = ROOT / "output"
 
 EMAIL_FROM = os.getenv("EMAIL_FROM", "")
@@ -30,6 +32,7 @@ SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASS = os.getenv("SMTP_PASS", "")
 DAYS_BACK = int(os.getenv("DAYS_BACK", "7"))
 MAX_ARTICLES = int(os.getenv("MAX_ARTICLES", "3"))
+MAX_EPISODES = int(os.getenv("MAX_EPISODES", "2"))
 
 
 def load_portfolio():
@@ -37,8 +40,12 @@ def load_portfolio():
         return json.load(f)
 
 
+def load_podcasts():
+    with open(PODCASTS_FILE) as f:
+        return json.load(f)
+
+
 def collect_entities(portfolio):
-    """Return a flat list of all entity dicts in display order."""
     entities = []
     for managers in portfolio["funds"].values():
         entities.extend(managers)
@@ -48,7 +55,7 @@ def collect_entities(portfolio):
     return entities
 
 
-def fetch_all_news(entities, days_back=DAYS_BACK):
+def fetch_all_news(entities, days_back):
     news_data = {}
     total = len(entities)
     for i, entity in enumerate(entities, 1):
@@ -56,6 +63,16 @@ def fetch_all_news(entities, days_back=DAYS_BACK):
         print(f"  [{i}/{total}] {name}")
         news_data[name] = fetch_news(entity, max_items=MAX_ARTICLES, days_back=days_back)
     return news_data
+
+
+def fetch_all_podcasts(podcasts, days_back):
+    print(f"Fetching episodes for {len(podcasts)} podcasts...")
+    result = []
+    for i, pod in enumerate(podcasts, 1):
+        print(f"  [{i}/{len(podcasts)}] {pod['name']}")
+        episodes = fetch_podcast_episodes(pod, max_episodes=MAX_EPISODES, days_back=days_back)
+        result.append({**pod, "episodes": episodes})
+    return result
 
 
 def send_email(html_content):
@@ -84,14 +101,13 @@ def save_html(html_content):
 
 
 def check_email_config():
-    missing = [k for k in ("EMAIL_FROM", "EMAIL_TO", "SMTP_USER", "SMTP_PASS") if not os.getenv(k)]
-    return missing
+    return [k for k in ("EMAIL_FROM", "EMAIL_TO", "SMTP_USER", "SMTP_PASS") if not os.getenv(k)]
 
 
 def main():
     parser = argparse.ArgumentParser(description="MyDailyDashboard — investment email digest")
     parser.add_argument("--preview", action="store_true", help="Save HTML only, do not send email")
-    parser.add_argument("--days", type=int, default=None, help="Days of news to include (default: 7)")
+    parser.add_argument("--days", type=int, default=None, help="Days of news/episodes to include (default: 7)")
     args = parser.parse_args()
 
     days_back = args.days if args.days is not None else DAYS_BACK
@@ -99,12 +115,15 @@ def main():
     print("Loading portfolio...")
     portfolio = load_portfolio()
     entities = collect_entities(portfolio)
-    print(f"Fetching news for {len(entities)} entities (last {days_back} days)...")
 
+    print(f"Fetching news for {len(entities)} entities (last {days_back} days)...")
     news_data = fetch_all_news(entities, days_back=days_back)
 
+    podcasts = load_podcasts()
+    podcast_data = fetch_all_podcasts(podcasts, days_back=days_back)
+
     print("Building dashboard...")
-    html = build_html(portfolio, news_data)
+    html = build_html(portfolio, news_data, podcast_data=podcast_data)
     output_path = save_html(html)
 
     if args.preview:

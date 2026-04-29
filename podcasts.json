@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Prof G Markets",
+    "rss": "https://feeds.megaphone.fm/prof-g-markets",
+    "note": null
+  },
+  {
+    "name": "20VC",
+    "rss": "https://the20minvc.com/feed/podcast/",
+    "note": null
+  },
+  {
+    "name": "Eye on the Market",
+    "rss": "https://feeds.megaphone.fm/eye-on-the-market",
+    "note": "Monthly newsletter also at jpmorgan.com/insights/research/eye-on-the-market"
+  },
+  {
+    "name": "Invest Like the Best",
+    "rss": "https://feeds.simplecast.com/investlikethebest",
+    "note": null
+  },
+  {
+    "name": "Acquired",
+    "rss": "https://acquired.fm/rss",
+    "note": null
+  },
+  {
+    "name": "Capital Allocators",
+    "rss": "https://capitalallocationspodcast.com/feed/podcast/",
+    "note": null
+  },
+  {
+    "name": "Money Stuff",
+    "rss": "https://feeds.bloomberg.com/podcasts/money-stuff.rss",
+    "note": "Matt Levine — newsletter also at bloomberg.com/opinion/authors/ARbTQlRLRjE/matthew-s-levine"
+  },
+  {
+    "name": "On Investing",
+    "rss": "https://feeds.megaphone.fm/on-investing",
+    "note": null
+  },
+  {
+    "name": "How I Invest",
+    "rss": "https://feeds.simplecast.com/how-i-invest",
+    "note": null
+  }
+]
