@@ -1,0 +1,59 @@
+{
+  "funds": {
+    "Buyouts North America": [
+      {
+        "name": "PPC",
+        "search_query": "PPC private equity buyout"
+      }
+    ],
+    "Venture Capital": [
+      { "name": "8VC" },
+      { "name": "Blossom Capital" },
+      { "name": "Eclipse Ventures" },
+      { "name": "Founders Fund" },
+      { "name": "Lux Capital" },
+      { "name": "Mosaic Ventures" },
+      { "name": "Spark Capital Partners", "search_query": "Spark Capital venture" },
+      { "name": "Union Square Ventures", "search_query": "Union Square Ventures USV" },
+      { "name": "VMG Catalyst", "search_query": "VMG Catalyst consumer venture" }
+    ],
+    "Growth Equity": [
+      { "name": "Highland Europe" },
+      { "name": "Riverwood Capital" },
+      { "name": "Technology Crossover Ventures", "search_query": "TCV Technology Crossover Ventures" },
+      { "name": "Vitruvian Partners" },
+      { "name": "VMG Partners" }
+    ],
+    "Buyouts Western Europe": [
+      { "name": "GHO Capital", "search_query": "GHO Capital healthcare private equity" },
+      { "name": "HgCapital" }
+    ]
+  },
+  "co_investments": [
+    { "name": "Benevity" },
+    { "name": "Casago", "aka": "Vacasa", "search_query": "Casago OR Vacasa vacation rental" },
+    { "name": "C.H. Guenther & Son", "search_query": "\"C.H. Guenther\" OR \"CH Guenther\"" },
+    { "name": "Clearview Healthcare Partners" },
+    { "name": "CLP Co-Investment Overflow", "search_query": "CLP private equity co-investment" },
+    { "name": "Gerson Lehrman Group", "search_query": "Gerson Lehrman Group GLG" },
+    { "name": "Linimed Gruppe", "search_query": "Linimed Gruppe healthcare Germany" },
+    { "name": "Medforth Global Healthcare Education", "search_query": "Medforth Global Healthcare Education" },
+    { "name": "Nubank", "ticker": "NU" },
+    { "name": "Plaskolite" },
+    { "name": "Sportradar", "ticker": "SRAD" },
+    { "name": "Velocity Clinical Research" },
+    { "name": "Vexos Corporation", "aka": "Staci", "search_query": "\"Vexos Corporation\" OR \"Staci\" logistics" },
+    { "name": "WIS International" }
+  ],
+  "non_core_holdings": {
+    ">$50M FMV + Unfunded": [
+      { "name": "GGV Capital" },
+      { "name": "LS Power Equity Partners", "search_query": "LS Power private equity energy" },
+      { "name": "Qiming Venture Partners", "search_query": "Qiming Venture Partners China" },
+      { "name": "Trustar Capital Partners", "aka": "CITIC Capital Partners", "search_query": "Trustar Capital OR \"CITIC Capital Partners\"" },
+      { "name": "Trustbridge", "search_query": "Trustbridge private equity China" }
+    ],
+    "$25-$50M FMV + Unfunded": [],
+    "$5-$25M FMV + Unfunded": []
+  }
+}
