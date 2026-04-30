@@ -67,12 +67,14 @@ def _fetch_newsapi(entity, max_items, days_back):
                     pub_date = pub_date.replace(tzinfo=None)
                 except Exception:
                     pass
+            summary = _truncate(item.get("description") or "", 250)
             articles.append(
                 {
                     "title": _clean_title(item.get("title") or ""),
                     "link": item.get("url") or "",
                     "source": (item.get("source") or {}).get("name", "Unknown"),
                     "date": pub_date.strftime("%b %d, %Y") if pub_date else "Recent",
+                    "summary": summary,
                 }
             )
         return articles
@@ -135,6 +137,12 @@ def _fetch_gnews_rss(entity, max_items, days_back):
     except Exception as exc:
         print(f"  Warning: could not fetch news for {entity['name']}: {exc}")
         return []
+
+
+def _truncate(text, length):
+    if len(text) <= length:
+        return text
+    return text[:length - 1].rsplit(" ", 1)[0] + "…"
 
 
 def _clean_title(title):

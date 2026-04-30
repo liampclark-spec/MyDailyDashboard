@@ -180,14 +180,21 @@ def _entity_card(name, articles, subtitle=None):
     if articles:
         news_html = ""
         for a in articles:
+            summary_html = ""
+            if a.get("summary"):
+                summary_html = (
+                    f'<div style="margin-top:4px;font-size:12px;color:#475569;line-height:1.5;">'
+                    f'{a["summary"]}</div>'
+                )
             news_html += f"""
       <div style="margin-top:8px;padding:8px 12px;background:#f1f5fb;
                   border-left:3px solid #2563eb;border-radius:0 4px 4px 0;">
         <a href="{a['link']}" style="font-size:13px;color:#1d4ed8;text-decoration:none;
                                      font-weight:500;line-height:1.45;">{a['title']}</a>
-        <div style="margin-top:3px;font-size:11px;color:#94a3b8;">
+        <div style="margin-top:2px;font-size:11px;color:#94a3b8;">
           {a['source']} &nbsp;·&nbsp; {a['date']}
         </div>
+        {summary_html}
       </div>"""
     else:
         news_html = (

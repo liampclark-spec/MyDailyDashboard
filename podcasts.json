@@ -1,47 +1,48 @@
 [
   {
     "name": "Prof G Markets",
-    "rss": "https://rss.art19.com/prof-g-markets",
-    "note": null
+    "youtube_url": "https://www.youtube.com/@profgmarkets"
   },
   {
     "name": "20VC",
-    "rss": "https://feeds.acast.com/public/shows/the-twenty-minute-vc-20vc-venture-capital-finance-startups",
-    "note": null
+    "youtube_url": "https://www.youtube.com/@20VC"
   },
   {
     "name": "Eye on the Market",
-    "rss": "https://rss.art19.com/eye-on-the-market",
-    "note": "Monthly newsletter also at jpmorgan.com/insights/research/eye-on-the-market"
+    "search_query": "Michael Cembalest \"Eye on the Market\" JPMorgan",
+    "note": "Michael Cembalest, JPMorgan — privatebank.jpmorgan.com/nam/en/people/michael-cembalest"
   },
   {
     "name": "Invest Like the Best",
-    "rss": "https://feeds.simplecast.com/invest-like-the-best",
-    "note": null
+    "youtube_url": "https://www.youtube.com/@ILTB_Podcast"
   },
   {
     "name": "Acquired",
-    "rss": "https://feeds.simplecast.com/acquired",
-    "note": null
+    "youtube_url": "https://www.youtube.com/@AcquiredFM"
   },
   {
     "name": "Capital Allocators",
-    "rss": "https://feeds.megaphone.fm/capital-allocators",
-    "note": null
+    "youtube_url": "https://www.youtube.com/@capitalallocatorspodcast"
   },
   {
     "name": "Money Stuff",
-    "rss": "https://feeds.bloomberg.com/podcasts/money-stuff-the-podcast.rss",
-    "note": "Matt Levine — newsletter at bloomberg.com/opinion/authors/ARbTQlRLRjE/matthew-s-levine"
+    "youtube_playlist_id": "PLe4PRejZgr0Mxz914cYuVpTiUuqiF3U0x",
+    "note": "Matt Levine, Bloomberg"
   },
   {
     "name": "On Investing",
-    "rss": "https://feeds.megaphone.fm/schwab-on-investing",
-    "note": null
+    "youtube_playlist_id": "PLf5N6dqfQaNTVtOkUsc80ufkbGw59uGVi"
   },
   {
     "name": "How I Invest",
-    "rss": "https://feeds.simplecast.com/how-i-invest-with-david-weisburd",
-    "note": null
+    "youtube_url": "https://www.youtube.com/@david_weisburd"
+  },
+  {
+    "name": "Odd Lots",
+    "youtube_playlist_id": "PLe4PRejZgr0OJbRzA6nWybYiThLJd_ouz"
+  },
+  {
+    "name": "Goldman Sachs",
+    "youtube_url": "https://www.youtube.com/user/GoldmanSachs"
   }
 ]
