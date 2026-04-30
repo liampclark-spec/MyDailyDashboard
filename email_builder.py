@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-def build_html(portfolio, news_data, podcast_data=None):
+def build_html(portfolio, news_data, podcast_data=None, stocks_data=None, sports_data=None):
     today = datetime.now().strftime("%A, %B %d, %Y")
 
     total_managers = sum(len(v) for v in portfolio["funds"].values())
@@ -42,6 +42,14 @@ def build_html(portfolio, news_data, podcast_data=None):
             for ent in entities:
                 nc_content += _entity_card(ent["name"], news_data.get(ent["name"], []))
         sections.append(_section("Non-Core Holdings", nc_content, bg="#ffffff"))
+
+    # --- Stocks ---
+    if stocks_data:
+        sections.append(_stocks_section(stocks_data))
+
+    # --- Sports ---
+    if sports_data:
+        sections.append(_sports_section(sports_data))
 
     # --- Podcasts ---
     if podcast_data:
@@ -216,3 +224,156 @@ def _footer():
   <tr><td style="background:#0f2044;padding:16px 36px;border-radius:0 0 10px 10px;text-align:center;">
     <div style="color:#4a6fa5;font-size:11px;">Generated {ts} &nbsp;·&nbsp; MyDailyDashboard</div>
   </td></tr>"""
+
+
+# ── Stocks section ────────────────────────────────────────────────────────────
+
+def _stocks_section(stocks_data):
+    content = ""
+    for stock in stocks_data:
+        content += _stock_card(stock)
+    return _section("My Stocks", content, bg="#f8fafc")
+
+
+def _stock_card(stock):
+    ticker  = stock["ticker"]
+    name    = stock["name"]
+    price   = stock.get("price")
+    chg     = stock.get("change")
+    chg_pct = stock.get("change_pct")
+    news    = stock.get("news", [])
+
+    # Price pill
+    if price is not None and chg_pct is not None:
+        up = chg_pct >= 0
+        arrow    = "▲" if up else "▼"
+        clr      = "#16a34a" if up else "#dc2626"
+        bg_clr   = "#f0fdf4" if up else "#fef2f2"
+        price_pill = (
+            f'<span style="background:{bg_clr};color:{clr};font-size:12px;font-weight:600;'
+            f'padding:2px 8px;border-radius:12px;white-space:nowrap;">'
+            f'${price:,.2f} &nbsp;{arrow} {abs(chg_pct):.2f}%</span>'
+        )
+    else:
+        price_pill = '<span style="font-size:12px;color:#94a3b8;">Price unavailable</span>'
+
+    header = f"""
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+        <div>
+          <span style="font-size:14px;font-weight:700;color:#0f2044;">{ticker}</span>
+          <span style="font-size:12px;color:#64748b;margin-left:6px;">{name}</span>
+        </div>
+        {price_pill}
+      </div>"""
+
+    news_html = ""
+    for a in news:
+        summary_html = (
+            f'<div style="margin-top:3px;font-size:12px;color:#475569;line-height:1.5;">{a["summary"]}</div>'
+            if a.get("summary") else ""
+        )
+        news_html += f"""
+      <div style="margin-top:8px;padding:8px 12px;background:#f1f5fb;
+                  border-left:3px solid #7c3aed;border-radius:0 4px 4px 0;">
+        <a href="{a['link']}" style="font-size:13px;color:#6d28d9;text-decoration:none;
+                                     font-weight:500;line-height:1.45;">{a['title']}</a>
+        <div style="margin-top:2px;font-size:11px;color:#94a3b8;">
+          {a['source']} &nbsp;·&nbsp; {a['date']}
+        </div>
+        {summary_html}
+      </div>"""
+
+    if not news_html:
+        news_html = '<div style="margin-top:6px;font-size:12px;color:#cbd5e1;font-style:italic;">No recent earnings or news found</div>'
+
+    return f"""
+    <div style="margin-bottom:14px;padding:14px 16px;border:1px solid #e2e8f0;
+                border-radius:7px;background:#ffffff;">
+      {header}
+      {news_html}
+    </div>"""
+
+
+# ── Sports section ────────────────────────────────────────────────────────────
+
+def _sports_section(sports_data):
+    yesterday = (
+        __import__("datetime").datetime.now() -
+        __import__("datetime").timedelta(days=1)
+    ).strftime("%A, %B %d")
+
+    content = f'<div style="font-size:12px;color:#64748b;margin-bottom:16px;">Results for {yesterday}</div>'
+
+    for sport_name, games in sports_data.items():
+        if not games:
+            continue
+        content += _category_header(sport_name)
+        for game in games:
+            content += _game_card(game)
+
+    return _section("Sports", content, bg="#ffffff")
+
+
+def _game_card(game):
+    home, away   = game["home"], game["away"]
+    hs, as_      = game["home_score"], game["away_score"]
+    status       = game["status"]
+    favourite    = game.get("favourite")
+    headline     = game.get("headline", "")
+    leaders      = game.get("leaders", [])
+
+    # Determine winner highlight
+    try:
+        h_int, a_int = int(hs), int(as_)
+        home_bold = "font-weight:700;" if h_int > a_int else ""
+        away_bold = "font-weight:700;" if a_int > h_int else ""
+    except (ValueError, TypeError):
+        home_bold = away_bold = ""
+
+    fav_badge = ""
+    if favourite:
+        fav_badge = (
+            f'<span style="background:#fef3c7;color:#b45309;font-size:10px;font-weight:700;'
+            f'padding:1px 7px;border-radius:10px;margin-left:8px;">★ {favourite}</span>'
+        )
+
+    score_line = f"""
+      <div style="font-size:13px;color:#1e293b;padding:6px 0;">
+        <span style="{away_bold}">{away}</span>
+        <span style="color:#94a3b8;margin:0 6px;">vs</span>
+        <span style="{home_bold}">{home}</span>
+        <span style="color:#64748b;margin-left:10px;font-size:12px;">{away} {as_} – {hs} {home}</span>
+        <span style="color:#94a3b8;font-size:11px;margin-left:8px;">{status}</span>
+        {fav_badge}
+      </div>"""
+
+    if headline:
+        score_line += (
+            f'<div style="font-size:12px;color:#475569;padding:2px 0 4px;font-style:italic;">'
+            f'{headline}</div>'
+        )
+
+    # Box score leaders for favourite team games
+    leaders_html = ""
+    if leaders:
+        rows = "".join(
+            f'<span style="margin-right:14px;white-space:nowrap;">'
+            f'<span style="color:#94a3b8;font-size:10px;">{l["category"].upper()}</span> '
+            f'<span style="font-size:12px;font-weight:600;color:#1e293b;">{l["player"]}</span> '
+            f'<span style="font-size:12px;color:#64748b;">{l["value"]}</span>'
+            f'</span>'
+            for l in leaders
+        )
+        leaders_html = (
+            f'<div style="background:#f8fafc;padding:6px 10px;border-radius:4px;'
+            f'margin-top:4px;flex-wrap:wrap;display:flex;">{rows}</div>'
+        )
+
+    border = "border-left:3px solid #f59e0b;" if favourite else "border-left:3px solid #e2e8f0;"
+
+    return f"""
+    <div style="margin-bottom:10px;padding:10px 14px;border:1px solid #e2e8f0;{border}
+                border-radius:7px;background:#ffffff;">
+      {score_line}
+      {leaders_html}
+    </div>"""

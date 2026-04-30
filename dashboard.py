@@ -15,6 +15,8 @@ from sendgrid.helpers.mail import Mail
 from email_builder import build_html
 from news_fetcher import fetch_news
 from podcast_fetcher import fetch_podcast_episodes
+from sports_fetcher import fetch_sports
+from stocks_fetcher import fetch_all_stocks, STOCKS
 
 load_dotenv()
 
@@ -114,8 +116,19 @@ def main():
     podcasts = load_podcasts()
     podcast_data = fetch_all_podcasts(podcasts, days_back=days_back)
 
+    print(f"Fetching prices and news for {len(STOCKS)} stocks...")
+    stocks_data = fetch_all_stocks(max_news=MAX_ARTICLES, days_back=days_back)
+
+    print("Fetching sports scores...")
+    sports_data = fetch_sports()
+
     print("Building dashboard...")
-    html = build_html(portfolio, news_data, podcast_data=podcast_data)
+    html = build_html(
+        portfolio, news_data,
+        podcast_data=podcast_data,
+        stocks_data=stocks_data,
+        sports_data=sports_data,
+    )
     output_path = save_html(html)
 
     if args.preview:
