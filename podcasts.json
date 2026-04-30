@@ -1,47 +1,47 @@
 [
   {
     "name": "Prof G Markets",
-    "rss": "https://feeds.megaphone.fm/prof-g-markets",
+    "rss": "https://rss.art19.com/prof-g-markets",
     "note": null
   },
   {
     "name": "20VC",
-    "rss": "https://the20minvc.com/feed/podcast/",
+    "rss": "https://feeds.acast.com/public/shows/the-twenty-minute-vc-20vc-venture-capital-finance-startups",
     "note": null
   },
   {
     "name": "Eye on the Market",
-    "rss": "https://feeds.megaphone.fm/eye-on-the-market",
+    "rss": "https://rss.art19.com/eye-on-the-market",
     "note": "Monthly newsletter also at jpmorgan.com/insights/research/eye-on-the-market"
   },
   {
     "name": "Invest Like the Best",
-    "rss": "https://feeds.simplecast.com/investlikethebest",
+    "rss": "https://feeds.simplecast.com/invest-like-the-best",
     "note": null
   },
   {
     "name": "Acquired",
-    "rss": "https://acquired.fm/rss",
+    "rss": "https://feeds.simplecast.com/acquired",
     "note": null
   },
   {
     "name": "Capital Allocators",
-    "rss": "https://capitalallocationspodcast.com/feed/podcast/",
+    "rss": "https://feeds.megaphone.fm/capital-allocators",
     "note": null
   },
   {
     "name": "Money Stuff",
-    "rss": "https://feeds.bloomberg.com/podcasts/money-stuff.rss",
-    "note": "Matt Levine — newsletter also at bloomberg.com/opinion/authors/ARbTQlRLRjE/matthew-s-levine"
+    "rss": "https://feeds.bloomberg.com/podcasts/money-stuff-the-podcast.rss",
+    "note": "Matt Levine — newsletter at bloomberg.com/opinion/authors/ARbTQlRLRjE/matthew-s-levine"
   },
   {
     "name": "On Investing",
-    "rss": "https://feeds.megaphone.fm/on-investing",
+    "rss": "https://feeds.megaphone.fm/schwab-on-investing",
     "note": null
   },
   {
     "name": "How I Invest",
-    "rss": "https://feeds.simplecast.com/how-i-invest",
+    "rss": "https://feeds.simplecast.com/how-i-invest-with-david-weisburd",
     "note": null
   }
 ]
