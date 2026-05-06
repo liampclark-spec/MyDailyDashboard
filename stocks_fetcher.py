@@ -36,44 +36,58 @@ STOCKS = [
 
 
 def fetch_all_stocks(max_news=3, days_back=7):
+    tickers = [s["ticker"] for s in STOCKS]
+
+    # One batch request for all prices — avoids rate limiting
+    print(f"  Fetching prices in batch...")
+    price_map = _batch_prices(tickers)
+
     results = []
     for stock in STOCKS:
         print(f"  {stock['ticker']}")
-        data = _fetch_one(stock, max_news, days_back)
-        results.append(data)
-        time.sleep(0.3)
+        price_info = price_map.get(
+            stock["ticker"],
+            {"price": None, "prev_close": None, "change": None, "change_pct": None},
+        )
+        news = _get_news(stock["ticker"], stock["search"], max_news, days_back)
+        results.append({**stock, **price_info, "news": news})
+        time.sleep(0.2)
     return results
 
 
-def _fetch_one(stock, max_news, days_back):
-    price_info = _get_price(stock["ticker"])
-    news = _get_news(stock["ticker"], stock["search"], max_news, days_back)
-    return {**stock, **price_info, "news": news}
-
-
-def _get_price(ticker_symbol):
+def _batch_prices(tickers):
+    """Download closing prices for all tickers in a single request."""
     try:
-        hist = yf.Ticker(ticker_symbol).history(period="2d")
-        if len(hist) >= 2:
-            prev_close = round(hist["Close"].iloc[-2], 2)
-            last_close = round(hist["Close"].iloc[-1], 2)
-            change     = round(last_close - prev_close, 2)
-            change_pct = round((change / prev_close) * 100, 2)
-        elif len(hist) == 1:
-            last_close = round(hist["Close"].iloc[-1], 2)
-            change, change_pct, prev_close = None, None, None
-        else:
-            return {"price": None, "prev_close": None, "change": None, "change_pct": None}
-
-        return {
-            "price":      last_close,
-            "prev_close": prev_close,
-            "change":     change,
-            "change_pct": change_pct,
-        }
+        raw = yf.download(
+            tickers,
+            period="2d",
+            group_by="ticker",
+            auto_adjust=True,
+            progress=False,
+            threads=True,
+        )
+        price_map = {}
+        for ticker in tickers:
+            try:
+                closes = raw[ticker]["Close"] if len(tickers) > 1 else raw["Close"]
+                closes = closes.dropna()
+                if len(closes) >= 2:
+                    prev  = round(float(closes.iloc[-2]), 2)
+                    last  = round(float(closes.iloc[-1]), 2)
+                    chg   = round(last - prev, 2)
+                    chg_p = round((chg / prev) * 100, 2)
+                    price_map[ticker] = {"price": last, "prev_close": prev, "change": chg, "change_pct": chg_p}
+                elif len(closes) == 1:
+                    price_map[ticker] = {"price": round(float(closes.iloc[-1]), 2), "prev_close": None, "change": None, "change_pct": None}
+                else:
+                    price_map[ticker] = {"price": None, "prev_close": None, "change": None, "change_pct": None}
+            except Exception:
+                price_map[ticker] = {"price": None, "prev_close": None, "change": None, "change_pct": None}
+        return price_map
     except Exception as exc:
-        print(f"  Warning: price fetch failed for {ticker_symbol}: {exc}")
-        return {"price": None, "prev_close": None, "change": None, "change_pct": None}
+        print(f"  Warning: batch price fetch failed: {exc}")
+        return {}
+
 
 
 def _get_news(ticker_symbol, search_terms, max_news, days_back):
