@@ -1,5 +1,7 @@
 """
-Stock prices via yfinance and earnings/news via NewsAPI.
+Stock prices via Twelve Data API (free tier: 800 calls/day).
+One batch request covers all 13 tickers.
+Sign up for a free key at https://twelvedata.com
 """
 
 import os
@@ -7,17 +9,16 @@ import time
 from datetime import datetime, timedelta
 
 import requests
-import yfinance as yf
 from dotenv import load_dotenv
 
 load_dotenv()
 
-NEWSAPI_KEY = os.getenv("NEWSAPI_KEY", "")
+NEWSAPI_KEY      = os.getenv("NEWSAPI_KEY", "")
+TWELVE_DATA_KEY  = os.getenv("TWELVE_DATA_KEY", "")
 
 _SESSION = requests.Session()
 _SESSION.headers.update({"User-Agent": "Mozilla/5.0 (compatible; MyDailyDashboard/1.0)"})
 
-# Display name and NewsAPI search terms per ticker
 STOCKS = [
     {"ticker": "GOOGL", "name": "Google / Alphabet",       "search": "Alphabet OR Google GOOGL"},
     {"ticker": "KKR",   "name": "KKR",                     "search": "KKR"},
@@ -36,11 +37,8 @@ STOCKS = [
 
 
 def fetch_all_stocks(max_news=3, days_back=7):
-    tickers = [s["ticker"] for s in STOCKS]
-
-    # One batch request for all prices — avoids rate limiting
-    print(f"  Fetching prices in batch...")
-    price_map = _batch_prices(tickers)
+    print("  Fetching prices (Twelve Data)...")
+    price_map = _batch_prices()
 
     results = []
     for stock in STOCKS:
@@ -51,50 +49,57 @@ def fetch_all_stocks(max_news=3, days_back=7):
         )
         news = _get_news(stock["ticker"], stock["search"], max_news, days_back)
         results.append({**stock, **price_info, "news": news})
-        time.sleep(0.2)
+        time.sleep(0.15)
     return results
 
 
-def _batch_prices(tickers):
-    """Download closing prices for all tickers in a single request."""
-    try:
-        raw = yf.download(
-            tickers,
-            period="2d",
-            group_by="ticker",
-            auto_adjust=True,
-            progress=False,
-            threads=True,
-        )
-        price_map = {}
-        for ticker in tickers:
-            try:
-                closes = raw[ticker]["Close"] if len(tickers) > 1 else raw["Close"]
-                closes = closes.dropna()
-                if len(closes) >= 2:
-                    prev  = round(float(closes.iloc[-2]), 2)
-                    last  = round(float(closes.iloc[-1]), 2)
-                    chg   = round(last - prev, 2)
-                    chg_p = round((chg / prev) * 100, 2)
-                    price_map[ticker] = {"price": last, "prev_close": prev, "change": chg, "change_pct": chg_p}
-                elif len(closes) == 1:
-                    price_map[ticker] = {"price": round(float(closes.iloc[-1]), 2), "prev_close": None, "change": None, "change_pct": None}
-                else:
-                    price_map[ticker] = {"price": None, "prev_close": None, "change": None, "change_pct": None}
-            except Exception:
-                price_map[ticker] = {"price": None, "prev_close": None, "change": None, "change_pct": None}
-        return price_map
-    except Exception as exc:
-        print(f"  Warning: batch price fetch failed: {exc}")
+def _batch_prices():
+    """Fetch quotes for all tickers in one Twelve Data API call."""
+    if not TWELVE_DATA_KEY:
+        print("  Warning: TWELVE_DATA_KEY not set — skipping prices")
         return {}
 
+    symbols = ",".join(s["ticker"] for s in STOCKS)
+    try:
+        resp = _SESSION.get(
+            "https://api.twelvedata.com/quote",
+            params={"symbol": symbols, "apikey": TWELVE_DATA_KEY, "dp": "2"},
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+
+        price_map = {}
+        # Single ticker returns the object directly; multiple returns {TICKER: {...}, ...}
+        if "symbol" in data:
+            data = {data["symbol"]: data}
+
+        for ticker, quote in data.items():
+            try:
+                price      = float(quote["close"])
+                prev_close = float(quote["previous_close"])
+                change     = round(price - prev_close, 2)
+                change_pct = round((change / prev_close) * 100, 2)
+                price_map[ticker] = {
+                    "price":      round(price, 2),
+                    "prev_close": round(prev_close, 2),
+                    "change":     change,
+                    "change_pct": change_pct,
+                }
+            except (KeyError, TypeError, ValueError):
+                price_map[ticker] = {"price": None, "prev_close": None, "change": None, "change_pct": None}
+
+        return price_map
+
+    except Exception as exc:
+        print(f"  Warning: price fetch failed: {exc}")
+        return {}
 
 
 def _get_news(ticker_symbol, search_terms, max_news, days_back):
     if not NEWSAPI_KEY:
         return []
 
-    # Bias toward earnings, results, and price-moving events
     query = f"({search_terms}) AND (earnings OR revenue OR results OR forecast OR acquisition OR guidance)"
     from_date = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
     params = {
