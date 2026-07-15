@@ -9,8 +9,7 @@ from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+import resend
 
 from email_builder import build_html
 from news_fetcher import fetch_news
@@ -25,7 +24,7 @@ PORTFOLIO_FILE = ROOT / "portfolio.json"
 PODCASTS_FILE = ROOT / "podcasts.json"
 OUTPUT_DIR = ROOT / "output"
 
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 EMAIL_FROM = os.getenv("EMAIL_FROM", "")
 EMAIL_TO = os.getenv("EMAIL_TO", "")
 DAYS_BACK = int(os.getenv("DAYS_BACK", "7"))
@@ -75,15 +74,16 @@ def fetch_all_podcasts(podcasts, days_back):
 
 def send_email(html_content):
     subject = f"Investment Dashboard – {datetime.now().strftime('%B %d, %Y')}"
-    message = Mail(
-        from_email=EMAIL_FROM,
-        to_emails=[a.strip() for a in EMAIL_TO.split(",")],
-        subject=subject,
-        html_content=html_content,
-    )
-    sg = SendGridAPIClient(SENDGRID_API_KEY)
-    response = sg.send(message)
-    print(f"Email sent — status {response.status_code} → {EMAIL_TO}")
+    resend.api_key = RESEND_API_KEY
+    params = {
+        "from": EMAIL_FROM,
+        "to": [a.strip() for a in EMAIL_TO.split(",")],
+        "subject": subject,
+        "html": html_content,
+    }
+    email = resend.Emails.send(params)
+    email_id = email.get("id", "unknown") if isinstance(email, dict) else "sent"
+    print(f"Email sent → {EMAIL_TO} (id: {email_id})")
 
 
 def save_html(html_content):
@@ -95,7 +95,7 @@ def save_html(html_content):
 
 
 def check_email_config():
-    return [k for k in ("SENDGRID_API_KEY", "EMAIL_FROM", "EMAIL_TO") if not os.getenv(k)]
+    return [k for k in ("RESEND_API_KEY", "EMAIL_FROM", "EMAIL_TO") if not os.getenv(k)]
 
 
 def main():
