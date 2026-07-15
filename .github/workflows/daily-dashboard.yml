@@ -3,7 +3,7 @@ name: Daily Investment Dashboard
 on:
   schedule:
     - cron: "0 7 * * 1-5"   # 7:00 AM UTC, Monday–Friday
-  workflow_dispatch:          # also runnable manually from the GitHub Actions tab
+  workflow_dispatch:
 
 jobs:
   send-dashboard:
@@ -23,12 +23,12 @@ jobs:
 
       - name: Run dashboard
         env:
-          TWELVE_DATA_KEY:  ${{ secrets.TWELVE_DATA_KEY }}
-          NEWSAPI_KEY:      ${{ secrets.NEWSAPI_KEY }}
-          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-          EMAIL_FROM:       ${{ secrets.EMAIL_FROM }}
-          EMAIL_TO:         ${{ secrets.EMAIL_TO }}
-          DAYS_BACK:        "7"
-          MAX_ARTICLES:     "3"
-          MAX_EPISODES:     "2"
+          TWELVE_DATA_KEY: ${{ secrets.TWELVE_DATA_KEY }}
+          NEWSAPI_KEY:     ${{ secrets.NEWSAPI_KEY }}
+          RESEND_API_KEY:  ${{ secrets.RESEND_API_KEY }}
+          EMAIL_FROM:      ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO:        ${{ secrets.EMAIL_TO }}
+          DAYS_BACK:       "7"
+          MAX_ARTICLES:    "3"
+          MAX_EPISODES:    "2"
         run: python dashboard.py
